@@ -37,11 +37,10 @@ case class Period(st: Long, et: Long) {
   else (st to et by 1.day.toMillis).map(t => Period(t, t + 1.hour.toMillis)).toList
 }
 
-//todo: retry futures
-case class Memoize1[-T, +R](f: T => Future[R]) extends (T => Future[R]) {
-  private[this] val vals = TrieMap.empty[T, Future[R]]
+case class Memoize1[-T, +R](f: T => R) extends (T => R) {
+  private[this] val vals = TrieMap.empty[T, R]
 
-  def apply(x: T): Future[R] = {
+  def apply(x: T): R = {
     vals.getOrElseUpdate(x, f(x))
   }
 }
@@ -63,7 +62,28 @@ object Api extends App with SprayJsonSupport with DefaultJsonProtocol with Googl
   implicit val whf = jsonFormat2(WeatherHistory)
 
   val config = ConfigFactory.load()
-  val logger = Logging(system, getClass)
+  val logger = Logging(system.eventStream, getClass)
+
+  case class Retry1[-T, +R](f: T => Future[R]) extends (T=>Future[R]) {
+    def apply(x: T): Future[R] = {
+      (1 to 10).foldLeft(f(x))((fut, i) => fut.recoverWith { case ex: Exception => {
+        logger.error(ex, s"$i attempt failed")
+        f(x)
+      }
+      })
+    }
+  }
+
+  case class Retry3[-T1, -T2, -T3, +R](f: (T1,T2,T3) => Future[R]) extends ((T1,T2,T3)=>Future[R]) {
+    def apply(x: T1, y: T2, z: T3): Future[R] = {
+      (1 to 10).foldLeft(f(x,y,z))((fut, i) => fut.recoverWith { case ex: Exception => {
+        logger.error(ex, s"$i attempt failed")
+        f(x,y,z)
+      }
+      })
+    }
+  }
+
 
   lazy val geocodeFlow: Flow[HttpRequest, HttpResponse, Any] =
     Http().outgoingConnection(config.getString("services.geocode-api.host"))
@@ -72,8 +92,8 @@ object Api extends App with SprayJsonSupport with DefaultJsonProtocol with Googl
     Http().outgoingConnectionHttps(config.getString("services.weather-api.host"))
   }
 
-  lazy val geocodeMemo = Memoize1(coordinates)
-  lazy val historyMemo = Memoize3(history)
+  lazy val geocodeMemo = Memoize1(Retry1(coordinates))
+  lazy val historyMemo = Memoize3(Retry3(history))
 
   def geocodeApiRequest(request: HttpRequest): Future[HttpResponse] = Source.single(request).via(geocodeFlow).runWith(Sink.head)
 

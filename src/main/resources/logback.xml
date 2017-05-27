@@ -1,7 +1,7 @@
 <configuration>
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>server.log</file>
+    <file>logs/server.log</file>
     <append>true</append>
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
@@ -9,6 +9,33 @@
       <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
     </encoder>
   </appender>
+
+  <appender name="API" class="ch.qos.logback.core.FileAppender">
+    <file>logs/appi-service.log</file>
+    <append>true</append>
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  <appender name="FRONTEND" class="ch.qos.logback.core.FileAppender">
+    <file>logs/frontend-service.log</file>
+    <append>true</append>
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="net.az.weather.rest">
+    <appender-ref ref="FRONTEND" />
+  </logger>
+
+  <logger name="net.az.weather.connector">
+    <appender-ref ref="API" />
+  </logger>
 
   <root level="DEBUG">
     <appender-ref ref="FILE" />

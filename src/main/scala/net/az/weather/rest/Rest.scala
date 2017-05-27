@@ -35,7 +35,7 @@ object Rest extends App with SprayJsonSupport with DefaultJsonProtocol {
   implicit val whf = jsonFormat2(WeatherHistory)
 
   val config = ConfigFactory.load()
-  val logger = Logging(system, getClass)
+  val logger = Logging(system.eventStream, getClass)
 
   lazy val historyFlow: Flow[HttpRequest, HttpResponse, Any] =
     Http().outgoingConnection(config.getString("services.darksky-api.host"), config.getInt("services.darksky-api.port"))

@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-actor" % "2.4.11.2",
     "com.typesafe.akka" %% "akka-stream" % "2.4.11.2",
     "com.typesafe.akka" %% "akka-http-experimental" % "2.4.11.2",
-    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.11.2"
+    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.11.2",
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.11.2"
 )
 
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
@@ -27,5 +28,4 @@ libraryDependencies ++= Seq(
 libraryDependencies += "junit" % "junit" % "4.10" % "test"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.13"
 
