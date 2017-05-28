@@ -1,0 +1,1 @@
+java -cp * net.az.weather.connector.impl.darksky.Api
